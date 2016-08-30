@@ -1,0 +1,177 @@
+#!/usr/bin/python2.7
+
+import argparse
+import os
+import sys
+import subprocess
+import textwrap
+
+def main():
+
+    # Redefine the exception handling routine so that it does NOT
+    # do a trace dump if the user types ^C while lsseq is running.
+    #
+    old_excepthook = sys.excepthook
+    def new_hook(exceptionType, value, traceback):
+        if exceptionType != KeyboardInterrupt and exceptionType != IOError:
+            old_excepthook(exceptionType, value, traceback)
+        else:
+            pass
+    sys.excepthook = new_hook
+
+    p = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent('''\
+            Print table of powers of 2 up to n of integers 2 up to m.
+            '''),
+        usage="%(prog)s [OPTION]...")
+
+    p.add_argument("--version", action="version", version="0.100")
+    p.add_argument("--size", "-n", action="store", type=int, dest="n",
+        default=13, metavar="N",
+	help="The size of the multiplication table (default=13).")
+    p.add_argument("--primes", action="store_true",
+        dest="onlyPrimes", default=False,
+        help="only print out the multiplication table for prime numbers" )
+    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
+        default=-1, metavar="MAX",
+	help="Limit printing the table to numbers of length MAX-digits or less")
+
+    args = p.parse_args()
+
+    jpr
+
+    if args.n < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: the maximum power must be greater than one."
+        sys.exit(1)
+
+    if args.m < 2 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": error: The maximum integer M to calculate powers for must be greater than one."
+        sys.exit(1)
+
+    if args.maxDigits == 0 :
+        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
+            ": warning: max digits is 0, nothing to print."
+        sys.exit(0)
+
+
+    # Note: this "isPrime" array will be filled with True 
+    # in the case that we want to display ALL the integers
+    # from 2,m - sorry, it's a bit of a cheat to use this list
+    # this way, but it makes for clean code.
+    #
+    isPrime = [True]*(args.m+2)
+
+    # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
+    #
+    if args.onlyPrimes : 
+	p = 2
+	while p < (args.m / 2) :
+	    i = 2
+	    while p*i <= args.m :
+		isPrime[p*i] = False
+		i += 1
+	    p += 1
+	    while not isPrime[p] :
+		p += 1
+
+    # Find the largest prime in table
+    #
+    if not args.onlyPrimes :
+	maxM = args.m
+    else :
+	i = len(isPrime)
+	i -= 1
+	while not isPrime[i] : 
+	    i -= 1
+	maxM = i
+    maxN = args.n
+
+    # Calculate the length of the strings of the highest powers
+    # to be printed out (for formatting purposes)
+    #
+    intFormat = "{:d}"
+    if args.maxDigits > 0 :
+	n = 2
+	m = 2
+	while n < maxN :
+	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
+		n -= 1
+		break
+	    n += 1
+
+	while m < maxM :
+	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
+		m -= 1
+		break
+	    m += 1
+
+	maxN = n
+	maxM = m
+
+    outputLine = ""
+    formatList = [0]
+    commaFormat = "{:>,d}"
+    prettyMaxLen = 0
+    if args.maxDigits > 0 :
+	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
+    n = 1
+    while n <= maxN :
+	sPretty = commaFormat.format(pow(maxM, n))
+	sInt = intFormat.format(pow(maxM, n))
+
+	if args.maxDigits > 0 :
+	    if len(sInt) <= args.maxDigits :
+		formatList.append(len(sPretty))
+	    else :
+		formatList.append(prettyMaxLen)
+	else :
+	    formatList.append(len(sPretty))
+
+	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+	outputLine += commaFormatPad.format(n)
+	if n == 1 :
+	    outputLine = outputLine.replace("1", " ")
+	    outputLine += " | "
+	else :
+	    outputLine += "  "
+	n += 1
+
+    # Make the dividing line between list of powers 
+    # and first row of powers of 2.
+    #
+    dividingLine = "-"*len(outputLine)
+    s = list(dividingLine)
+    s[formatList[1] + 1] = '+'
+
+    # Print the powers to be displayed on first row
+    # then the dividing line.
+    #
+    print outputLine
+    print "".join(s)
+
+    # Now calculate and print the powers
+    #
+    m = 2
+    while m <= maxM :
+	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
+	outputLine = commaFormatPad.format(m) + " | "
+        n = 2
+        while n <= maxN :
+	    commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
+	    if args.maxDigits > 0 :
+		if len(intFormat.format(pow(m, n))) <= args.maxDigits :
+		    outputLine += commaFormatPad.format(pow(m, n)) + "  "
+		else :
+		    break
+	    else :
+		outputLine += commaFormatPad.format(pow(m, n)) + "  "
+            n += 1
+	if isPrime[m] :
+	    print outputLine
+        m += 1
+        
+if __name__ == '__main__':
+    main()
