@@ -22,7 +22,7 @@ def main():
     p = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-            Print table of powers of 2 up to n of integers 2 up to m.
+            Print the times table up to n by n.
             '''),
         usage="%(prog)s [OPTION]...")
 
@@ -39,38 +39,28 @@ def main():
 
     args = p.parse_args()
 
-    jpr
-
-    if args.n < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: the maximum power must be greater than one."
-        sys.exit(1)
-
-    if args.m < 2 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": error: The maximum integer M to calculate powers for must be greater than one."
-        sys.exit(1)
+    if args.n < 1 :
+        sys.exit(0)
 
     if args.maxDigits == 0 :
         print >> sys.stderr, os.path.basename(sys.argv[0]) + \
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
 
-
     # Note: this "isPrime" array will be filled with True 
     # in the case that we want to display ALL the integers
-    # from 2,m - sorry, it's a bit of a cheat to use this list
+    # from 2,n - sorry, it's a bit of a cheat to use this list
     # this way, but it makes for clean code.
     #
-    isPrime = [True]*(args.m+2)
+    isPrime = [True]*(args.XxNxX+2)
 
     # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
     #
     if args.onlyPrimes : 
 	p = 2
-	while p < (args.m / 2) :
+	while p < (args.XxNxX / 2) :
 	    i = 2
-	    while p*i <= args.m :
+	    while p*i <= args.XxNxX :
 		isPrime[p*i] = False
 		i += 1
 	    p += 1
@@ -80,36 +70,25 @@ def main():
     # Find the largest prime in table
     #
     if not args.onlyPrimes :
-	maxM = args.m
+	maxXxNxX = args.XxNxX
     else :
 	i = len(isPrime)
 	i -= 1
 	while not isPrime[i] : 
 	    i -= 1
-	maxM = i
-    maxN = args.n
+	maxXxNxX = i
 
-    # Calculate the length of the strings of the highest powers
-    # to be printed out (for formatting purposes)
+    # If maxDigits is set then the biggest number in the table has
+    # to be (99...9-1)/2 since (99...9+1)/2 * 2 (the slowest growing
+    # set of entries in the table are the twos) is one digit too long!
     #
     intFormat = "{:d}"
     if args.maxDigits > 0 :
-	n = 2
-	m = 2
-	while n < maxN :
-	    if len(intFormat.format(pow(2,n))) > args.maxDigits :
-		n -= 1
-		break
-	    n += 1
+	x = (int('9'*args.maxDigits)-1)/2
+	if x < maxXxNxX :
+	    maxXxNxX = x
 
-	while m < maxM :
-	    if len(intFormat.format(pow(m,2))) > args.maxDigits :
-		m -= 1
-		break
-	    m += 1
-
-	maxN = n
-	maxM = m
+    jpr
 
     outputLine = ""
     formatList = [0]
@@ -119,8 +98,8 @@ def main():
 	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
     n = 1
     while n <= maxN :
-	sPretty = commaFormat.format(pow(maxM, n))
-	sInt = intFormat.format(pow(maxM, n))
+	sPretty = commaFormat.format(pow(maxXxNxX, n))
+	sInt = intFormat.format(pow(maxXxNxX, n))
 
 	if args.maxDigits > 0 :
 	    if len(sInt) <= args.maxDigits :
@@ -154,24 +133,24 @@ def main():
 
     # Now calculate and print the powers
     #
-    m = 2
-    while m <= maxM :
+    XxNxX = 2
+    while XxNxX <= maxXxNxX :
 	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
-	outputLine = commaFormatPad.format(m) + " | "
+	outputLine = commaFormatPad.format(XxNxX) + " | "
         n = 2
         while n <= maxN :
 	    commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
 	    if args.maxDigits > 0 :
-		if len(intFormat.format(pow(m, n))) <= args.maxDigits :
-		    outputLine += commaFormatPad.format(pow(m, n)) + "  "
+		if len(intFormat.format(pow(XxNxX, n))) <= args.maxDigits :
+		    outputLine += commaFormatPad.format(pow(XxNxX, n)) + "  "
 		else :
 		    break
 	    else :
-		outputLine += commaFormatPad.format(pow(m, n)) + "  "
+		outputLine += commaFormatPad.format(pow(XxNxX, n)) + "  "
             n += 1
-	if isPrime[m] :
+	if isPrime[XxNxX] :
 	    print outputLine
-        m += 1
+        XxNxX += 1
         
 if __name__ == '__main__':
     main()
