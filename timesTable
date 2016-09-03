@@ -114,12 +114,13 @@ def main():
 	    formatList.append(len(sPretty))
 
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
-	outputLine += commaFormatPad.format(n)
-	if n == 1 :
-	    outputLine = outputLine.replace("1", "*")
-	    outputLine += " | "
-	else :
-	    outputLine += "  "
+	if isPrime[n] :
+	    outputLine += commaFormatPad.format(n)
+	    if n == 1 :
+		outputLine = outputLine.replace("1", "*")
+		outputLine += " | "
+	    else :
+		outputLine += "  "
 	n += 1
 
     # Make the horizontal dividing line of the table
@@ -142,15 +143,16 @@ def main():
         m = 2
 	if isPrime[n] :
 	    while m <= maxN :
-		x = n * m
-		commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
-		if args.maxDigits > 0 :
-		    if len(intFormat.format(x)) <= args.maxDigits :
-			outputLine += commaFormatPad.format(x) + "  "
+		if isPrime[m] :
+		    x = n * m
+		    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
+		    if args.maxDigits > 0 :
+			if len(intFormat.format(x)) <= args.maxDigits :
+			    outputLine += commaFormatPad.format(x) + "  "
+			else :
+			    break
 		    else :
-			break
-		else :
-		    outputLine += commaFormatPad.format(x) + "  "
+			outputLine += commaFormatPad.format(x) + "  "
 		m += 1
 	    print outputLine
         n += 1
