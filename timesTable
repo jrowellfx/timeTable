@@ -39,7 +39,11 @@ def main():
 
     args = p.parse_args()
 
-    if args.n < 1 :
+    if args.n < 2 :
+	if args.n == 1 :
+	    print " * | 1"
+	    print "---+---"
+	    print " 1 | 1"
         sys.exit(0)
 
     if args.maxDigits == 0 :
@@ -52,15 +56,15 @@ def main():
     # from 2,n - sorry, it's a bit of a cheat to use this list
     # this way, but it makes for clean code.
     #
-    isPrime = [True]*(args.XxNxX+2)
+    isPrime = [True]*(args.n+1)
 
     # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
     #
     if args.onlyPrimes : 
 	p = 2
-	while p < (args.XxNxX / 2) :
+	while p < (args.n / 2) :
 	    i = 2
-	    while p*i <= args.XxNxX :
+	    while p*i <= args.n :
 		isPrime[p*i] = False
 		i += 1
 	    p += 1
@@ -70,13 +74,13 @@ def main():
     # Find the largest prime in table
     #
     if not args.onlyPrimes :
-	maxXxNxX = args.XxNxX
+	maxN = args.n
     else :
 	i = len(isPrime)
 	i -= 1
 	while not isPrime[i] : 
 	    i -= 1
-	maxXxNxX = i
+	maxN = i
 
     # If maxDigits is set then the biggest number in the table has
     # to be (99...9-1)/2 since (99...9+1)/2 * 2 (the slowest growing
@@ -85,10 +89,9 @@ def main():
     intFormat = "{:d}"
     if args.maxDigits > 0 :
 	x = (int('9'*args.maxDigits)-1)/2
-	if x < maxXxNxX :
-	    maxXxNxX = x
+	if x < maxN :
+	    maxN = x
 
-    jpr
 
     outputLine = ""
     formatList = [0]
@@ -98,8 +101,9 @@ def main():
 	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
     n = 1
     while n <= maxN :
-	sPretty = commaFormat.format(pow(maxXxNxX, n))
-	sInt = intFormat.format(pow(maxXxNxX, n))
+	x = n * maxN
+	sPretty = commaFormat.format(x)
+	sInt = intFormat.format(x)
 
 	if args.maxDigits > 0 :
 	    if len(sInt) <= args.maxDigits :
@@ -112,45 +116,44 @@ def main():
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
 	outputLine += commaFormatPad.format(n)
 	if n == 1 :
-	    outputLine = outputLine.replace("1", " ")
+	    outputLine = outputLine.replace("1", "*")
 	    outputLine += " | "
 	else :
 	    outputLine += "  "
 	n += 1
 
-    # Make the dividing line between list of powers 
-    # and first row of powers of 2.
+    # Make the horizontal dividing line of the table
     #
     dividingLine = "-"*len(outputLine)
     s = list(dividingLine)
     s[formatList[1] + 1] = '+'
 
-    # Print the powers to be displayed on first row
-    # then the dividing line.
+    # Print 2...n on the first row then the dividing line.
     #
     print outputLine
     print "".join(s)
 
-    # Now calculate and print the powers
+    # Print the multiplication table.
     #
-    XxNxX = 2
-    while XxNxX <= maxXxNxX :
+    n = 2
+    while n <= maxN :
 	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
-	outputLine = commaFormatPad.format(XxNxX) + " | "
-        n = 2
-        while n <= maxN :
-	    commaFormatPad = "{:>"+ str(formatList[n]) + ",d}"
-	    if args.maxDigits > 0 :
-		if len(intFormat.format(pow(XxNxX, n))) <= args.maxDigits :
-		    outputLine += commaFormatPad.format(pow(XxNxX, n)) + "  "
+	outputLine = commaFormatPad.format(n) + " | "
+        m = 2
+	if isPrime[n] :
+	    while m <= maxN :
+		x = n * m
+		commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
+		if args.maxDigits > 0 :
+		    if len(intFormat.format(x)) <= args.maxDigits :
+			outputLine += commaFormatPad.format(x) + "  "
+		    else :
+			break
 		else :
-		    break
-	    else :
-		outputLine += commaFormatPad.format(pow(XxNxX, n)) + "  "
-            n += 1
-	if isPrime[XxNxX] :
+		    outputLine += commaFormatPad.format(x) + "  "
+		m += 1
 	    print outputLine
-        XxNxX += 1
+        n += 1
         
 if __name__ == '__main__':
     main()
