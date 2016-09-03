@@ -9,7 +9,7 @@ import textwrap
 def main():
 
     # Redefine the exception handling routine so that it does NOT
-    # do a trace dump if the user types ^C while lsseq is running.
+    # do a trace dump if the user types ^C while the command is running.
     #
     old_excepthook = sys.excepthook
     def new_hook(exceptionType, value, traceback):
@@ -92,35 +92,26 @@ def main():
 	if x < maxN :
 	    maxN = x
 
-
-    outputLine = ""
-    formatList = [0]
     commaFormat = "{:>,d}"
-    prettyMaxLen = 0
     if args.maxDigits > 0 :
 	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
-    n = 1
-    while n <= maxN :
-	x = n * maxN
-	sPretty = commaFormat.format(x)
-	sInt = intFormat.format(x)
+    else :
+	prettyMaxLen = len(commaFormat.format(maxN * maxN))
 
-	if args.maxDigits > 0 :
-	    if len(sInt) <= args.maxDigits :
-		formatList.append(len(sPretty))
-	    else :
-		formatList.append(prettyMaxLen)
-	else :
-	    formatList.append(len(sPretty))
+    formatList = [0]
+    sPretty = commaFormat.format(maxN)
+    formatList.append(len(sPretty))
+    commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+    outputLine = commaFormatPad.format(1).replace("1", "*") + " | "
+
+    sPretty = commaFormat.format(maxN * maxN)
+    n = 2
+    while n <= maxN :
+	formatList.append(prettyMaxLen)
 
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
 	if isPrime[n] :
-	    outputLine += commaFormatPad.format(n)
-	    if n == 1 :
-		outputLine = outputLine.replace("1", "*")
-		outputLine += " | "
-	    else :
-		outputLine += "  "
+	    outputLine += commaFormatPad.format(n) + "  "
 	n += 1
 
     # Make the horizontal dividing line of the table
