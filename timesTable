@@ -139,11 +139,11 @@ def main():
 		    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
 		    if args.maxDigits > 0 :
 			if len(intFormat.format(x)) <= args.maxDigits :
-			    outputLine += commaFormatPad.format(x) + "  "
+			    outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
 			else :
 			    break
 		    else :
-			outputLine += commaFormatPad.format(x) + "  "
+			outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
 		m += 1
 	    print outputLine
         n += 1
