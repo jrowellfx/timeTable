@@ -5,8 +5,11 @@ import os
 import sys
 import subprocess
 import textwrap
+import math
 
 def main():
+
+    kEpsilon = 1.0e-12
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -26,14 +29,14 @@ def main():
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="0.100")
+    p.add_argument("--version", action="version", version="1.000")
     p.add_argument("--size", "-n", action="store", type=int, dest="n",
         default=13, metavar="N",
 	help="The size of the multiplication table (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out the multiplication table for prime numbers" )
-    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
+    p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1, metavar="MAX",
 	help="Limit printing the table to numbers of length MAX-digits or less")
 
@@ -86,28 +89,26 @@ def main():
     # to be (99...9-1)/2 since (99...9+1)/2 * 2 (the slowest growing
     # set of entries in the table are the twos) is one digit too long!
     #
-    intFormat = "{:d}"
     if args.maxDigits > 0 :
-	x = (int('9'*args.maxDigits)-1)/2
+	x = (int('9'*int(math.ceil(args.maxDigits)))-1)/2
 	if x < maxN :
 	    maxN = x
 
     commaFormat = "{:>,d}"
     if args.maxDigits > 0 :
-	prettyMaxLen = len(commaFormat.format(int("9"*args.maxDigits)))
+	commaFormatMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     else :
-	prettyMaxLen = len(commaFormat.format(maxN * maxN))
+	commaFormatMaxLen = len(commaFormat.format(maxN * maxN))
 
     formatList = [0]
-    sPretty = commaFormat.format(maxN)
-    formatList.append(len(sPretty))
+    commaFormattMaxN = commaFormat.format(maxN)
+    formatList.append(len(commaFormattMaxN))
     commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
     outputLine = commaFormatPad.format(1).replace("1", "*") + " | "
 
-    sPretty = commaFormat.format(maxN * maxN)
     n = 2
     while n <= maxN :
-	formatList.append(prettyMaxLen)
+	formatList.append(commaFormatMaxLen)
 
 	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
 	if isPrime[n] :
@@ -138,7 +139,7 @@ def main():
 		    x = n * m
 		    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
 		    if args.maxDigits > 0 :
-			if len(intFormat.format(x)) <= args.maxDigits :
+			if math.log(x, 10) <= args.maxDigits - kEpsilon :
 			    outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
 			else :
 			    break
