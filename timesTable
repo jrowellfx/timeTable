@@ -1,28 +1,28 @@
 #!/usr/bin/python2.7
 
 # BSD 3-Clause License
-# 
+#
 # Copyright (c) 2008-2020, James Philip Rowell,
 # Alpha Eleven Incorporated
 # www.alpha-eleven.com
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 #   - Redistributions of source code must retain the above copyright
 #     notice, this list of conditions and the following disclaimer.
-# 
+#
 #   - Redistributions in binary form must reproduce the above copyright
 #     notice, this list of conditions and the following disclaimer in
 #     the documentation and/or other materials provided with the
 #     distribution.
-# 
+#
 #   - Neither the name of "Alpha Eleven, Inc."  nor the names of its
 #     contributors may be used to endorse or promote products derived
 #     from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -67,21 +67,21 @@ def main():
     p.add_argument("--version", action="version", version="1.000")
     p.add_argument("--size", "-n", action="store", type=int, dest="n",
         default=13, metavar="N",
-	help="The size of the multiplication table (default=13).")
+        help="The size of the multiplication table (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out the multiplication table for prime numbers" )
     p.add_argument("--limit", action="store", type=float, dest="maxDigits",
         default=-1, metavar="MAX",
-	help="Limit printing the table to numbers of length MAX-digits or less")
+        help="Limit printing the table to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
     if args.n < 2 :
-	if args.n == 1 :
-	    print " * | 1"
-	    print "---+---"
-	    print " 1 | 1"
+        if args.n == 1 :
+            print " * | 1"
+            print "---+---"
+            print " 1 | 1"
         sys.exit(0)
 
     if args.maxDigits == 0 :
@@ -89,7 +89,7 @@ def main():
             ": warning: max digits is 0, nothing to print."
         sys.exit(0)
 
-    # Note: this "isPrime" array will be filled with True 
+    # Note: this "isPrime" array will be filled with True
     # in the case that we want to display ALL the integers
     # from 2,n - sorry, it's a bit of a cheat to use this list
     # this way, but it makes for clean code.
@@ -98,42 +98,42 @@ def main():
 
     # Sieve of Eratosthenes - skipped when wanting to list ALL numbers
     #
-    if args.onlyPrimes : 
-	p = 2
-	while p < (args.n / 2) :
-	    i = 2
-	    while p*i <= args.n :
-		isPrime[p*i] = False
-		i += 1
-	    p += 1
-	    while not isPrime[p] :
-		p += 1
+    if args.onlyPrimes :
+        p = 2
+        while p < (args.n / 2) :
+            i = 2
+            while p*i <= args.n :
+                isPrime[p*i] = False
+                i += 1
+            p += 1
+            while not isPrime[p] :
+                p += 1
 
     # Find the largest prime in table
     #
     if not args.onlyPrimes :
-	maxN = args.n
+        maxN = args.n
     else :
-	i = len(isPrime)
-	i -= 1
-	while not isPrime[i] : 
-	    i -= 1
-	maxN = i
+        i = len(isPrime)
+        i -= 1
+        while not isPrime[i] :
+            i -= 1
+        maxN = i
 
     # If maxDigits is set then the biggest number in the table has
     # to be (99...9-1)/2 since (99...9+1)/2 * 2 (the slowest growing
     # set of entries in the table are the twos) is one digit too long!
     #
     if args.maxDigits > 0 :
-	x = (int('9'*int(math.ceil(args.maxDigits)))-1)/2
-	if x < maxN :
-	    maxN = x
+        x = (int('9'*int(math.ceil(args.maxDigits)))-1)/2
+        if x < maxN :
+            maxN = x
 
     commaFormat = "{:>,d}"
     if args.maxDigits > 0 :
-	commaFormatMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
+        commaFormatMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
     else :
-	commaFormatMaxLen = len(commaFormat.format(maxN * maxN))
+        commaFormatMaxLen = len(commaFormat.format(maxN * maxN))
 
     formatList = [0]
     commaFormattMaxN = commaFormat.format(maxN)
@@ -143,12 +143,12 @@ def main():
 
     n = 2
     while n <= maxN :
-	formatList.append(commaFormatMaxLen)
+        formatList.append(commaFormatMaxLen)
 
-	commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
-	if isPrime[n] :
-	    outputLine += commaFormatPad.format(n) + "  "
-	n += 1
+        commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+        if isPrime[n] :
+            outputLine += commaFormatPad.format(n) + "  "
+        n += 1
 
     # Make the horizontal dividing line of the table
     #
@@ -165,24 +165,24 @@ def main():
     #
     n = 2
     while n <= maxN :
-	commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
-	outputLine = commaFormatPad.format(n) + " | "
+        commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
+        outputLine = commaFormatPad.format(n) + " | "
         m = 2
-	if isPrime[n] :
-	    while m <= maxN :
-		if isPrime[m] :
-		    x = n * m
-		    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
-		    if args.maxDigits > 0 :
-			if math.log(x, 10) <= args.maxDigits - kEpsilon :
-			    outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
-			else :
-			    break
-		    else :
-			outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
-		m += 1
-	    print outputLine
+        if isPrime[n] :
+            while m <= maxN :
+                if isPrime[m] :
+                    x = n * m
+                    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
+                    if args.maxDigits > 0 :
+                        if math.log(x, 10) <= args.maxDigits - kEpsilon :
+                            outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
+                        else :
+                            break
+                    else :
+                        outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
+                m += 1
+            print outputLine
         n += 1
-        
+
 if __name__ == '__main__':
     main()
