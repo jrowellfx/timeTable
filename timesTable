@@ -64,11 +64,11 @@ def main():
     p = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-            Print the times table up to n by n.
+            Print n by n times table for any base from two to sixty-two.
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="1.000")
+    p.add_argument("--version", action="version", version="2.000")
     p.add_argument("--base", "-b", action="store", type=int, dest="base",
         default=10, metavar="N",
         help="The base of the number system. Base must be in range [2, 62]. (default=10).")
