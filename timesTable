@@ -74,7 +74,7 @@ def main():
         help="The base of the number system. Base must be in range [2, 62]. (default=10).")
     p.add_argument("--size", "-n", action="store", type=int, dest="n",
         default=13, metavar="N",
-        help="The size of the multiplication table (default=13).")
+        help="The largest number in the table. Must be greater than 1. (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out the multiplication table for prime numbers" )
@@ -100,11 +100,10 @@ def main():
         sys.exit(1)
 
     if args.n < 2 :
-        if args.n == 1 :
-            print(" * | 1")
-            print("---+---")
-            print(" 1 | 1")
-        sys.exit(0)
+        print(os.path.basename(sys.argv[0]),
+            ": error: The largest number in the table must be at least 2.",
+            sep='', file=sys.stderr)
+        sys.exit(1)
 
     # Note: this "isPrime" array will be filled with True
     # in the case that we want to display ALL the integers
@@ -142,26 +141,31 @@ def main():
             i -= 1
         maxN = i
 
-    # If maxDigits is set then the biggest number in the table has
-    # to be (99...9-1)/2 since (99...9+1)/2 * 2 (the slowest growing
-    # set of entries in the table are the twos) is one digit too long!
-    #
+    numFormatMaxLen = len(base.encode(maxN * maxN))
+
     if args.maxDigits > 0 :
-        ## x = (int('9'*args.maxDigits)-1)/2
-        x = (base.decode(baseStr[-1]*args.maxDigits)-1)/2
+        if args.maxDigits < 3 and args.base == 2 :
+            print(os.path.basename(sys.argv[0]),
+                ": warning: Binary times-table with less than three digits will be empty. Skipping.",
+                sep='', file=sys.stderr)
+            sys.exit(0)
+
+        x = 2
+        while x <= maxN :
+            if len(base.encode(x*2)) > args.maxDigits :
+                x -= 1
+                break
+            x += 1
+
         if x < maxN :
             maxN = x
 
-    numFormat = "{:>{width}}"
-    if args.maxDigits > 0 :
         numFormatMaxLen = args.maxDigits
-    else :
-        numFormatMaxLen = len(base.encode(maxN * maxN))
 
-    formatList = [0] # I think this was so the index and numbers matched?
+    formatList = [0] # So the index and numbers match (Never use index 0)
     formatList.append(len(base.encode(maxN)))
-    numFormatPad = "{:>" + str(len(base.encode(formatList[-1]))) + "}"
-    outputLine = numFormatPad.format(1).replace("1", "*") + " | "
+    numFormatPad = "{:>" + str(formatList[-1]) + "}"
+    outputLine = " " + numFormatPad.format("1").replace("1", "*") + " | "
     ## print(outputLine)
     ## sys.exit(0)
 
@@ -169,10 +173,12 @@ def main():
     while n <= maxN :
         formatList.append(numFormatMaxLen)
 
-        numFormatPad = "{:>" + str(len(base.encode(formatList[-1]))) + "}"
+        numFormatPad = "{:>" + str(formatList[-1]) + "}"
         # Note the following is always true if we aren't filtering for ONLY primes. (hacky)
         if isPrime[n] :
             outputLine += numFormatPad.format(base.encode(n)) + "  "
+            ## if args.maxDigits < 0 or len(base.encode(n)) <= args.maxDigits :
+                ## outputLine += numFormatPad.format(base.encode(n)) + "  "
         n += 1
 
     ## print(outputLine)
@@ -182,7 +188,7 @@ def main():
     #
     dividingLine = "-"*len(outputLine)
     s = list(dividingLine)
-    s[formatList[1]] = '+'
+    s[formatList[1] + 2] = '+'
 
     # Print 2...n on the first row then the dividing line.
     #
@@ -196,7 +202,7 @@ def main():
     n = 2
     while n <= maxN :
         numFormatPad = "{:>"+ str(formatList[1]) + "}"
-        outputLine = numFormatPad.format(base.encode(n)) + " | "
+        outputLine = " " + numFormatPad.format(base.encode(n)) + " | "
         m = 2
         if isPrime[n] :
             while m <= maxN :
@@ -204,13 +210,14 @@ def main():
                     x = n * m
                     numFormatPad = "{:>"+ str(formatList[m]) + "}"
                     if args.maxDigits > 0 :
-                        if math.log(x, 10) <= args.maxDigits - kEpsilon :
+                        if math.log(x, args.base) <= args.maxDigits - kEpsilon :
                             outputLine += numFormatPad.format(base.encode(x)) + ("* " if n == m else "  ")
                         else :
                             break
                     else :
                         outputLine += numFormatPad.format(base.encode(x)) + ("* " if n == m else "  ")
                 m += 1
+            ## if not (args.maxDigits > 0 and outputLine[-3:] == " | ") :
             print(outputLine)
         n += 1
 
