@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python3
 
 # 3-Clause BSD License
 # 
@@ -42,10 +42,13 @@ import sys
 import subprocess
 import textwrap
 import math
+import baseconv
+import string
 
 def main():
 
     kEpsilon = 1.0e-12
+    kDigits = string.digits + string.ascii_uppercase + string.ascii_lowercase
 
     # Redefine the exception handling routine so that it does NOT
     # do a trace dump if the user types ^C while the command is running.
@@ -66,28 +69,41 @@ def main():
         usage="%(prog)s [OPTION]...")
 
     p.add_argument("--version", action="version", version="1.000")
+    p.add_argument("--base", "-b", action="store", type=int, dest="base",
+        default=10, metavar="N",
+        help="The base of the number system. Base must be in range [2, 62]. (default=10).")
     p.add_argument("--size", "-n", action="store", type=int, dest="n",
         default=13, metavar="N",
         help="The size of the multiplication table (default=13).")
     p.add_argument("--primes", action="store_true",
         dest="onlyPrimes", default=False,
         help="only print out the multiplication table for prime numbers" )
-    p.add_argument("--limit", action="store", type=float, dest="maxDigits",
+    p.add_argument("--limit", action="store", type=int, dest="maxDigits",
         default=-1, metavar="MAX",
         help="Limit printing the table to numbers of length MAX-digits or less")
 
     args = p.parse_args()
 
-    if args.n < 2 :
-        if args.n == 1 :
-            print " * | 1"
-            print "---+---"
-            print " 1 | 1"
+    if args.maxDigits == 0 :
+        print(os.path.basename(sys.argv[0]),
+            ": warning: max digits is 0, nothing to print.",
+            sep='', file=sys.stderr)
         sys.exit(0)
 
-    if args.maxDigits == 0 :
-        print >> sys.stderr, os.path.basename(sys.argv[0]) + \
-            ": warning: max digits is 0, nothing to print."
+    ## print(type(args.base))
+    ## sys.exit(0)
+
+    if args.base < 2 or args.base > 62:
+        print(os.path.basename(sys.argv[0]),
+            ": error: The base must be in the range [2, 62].",
+            sep='', file=sys.stderr)
+        sys.exit(1)
+
+    if args.n < 2 :
+        if args.n == 1 :
+            print(" * | 1")
+            print("---+---")
+            print(" 1 | 1")
         sys.exit(0)
 
     # Note: this "isPrime" array will be filled with True
@@ -110,6 +126,11 @@ def main():
             while not isPrime[p] :
                 p += 1
 
+    # Initialize base.
+    #
+    baseStr = kDigits[0: args.base]
+    base = baseconv.BaseConverter(baseStr)
+
     # Find the largest prime in table
     #
     if not args.onlyPrimes :
@@ -126,63 +147,71 @@ def main():
     # set of entries in the table are the twos) is one digit too long!
     #
     if args.maxDigits > 0 :
-        x = (int('9'*int(math.ceil(args.maxDigits)))-1)/2
+        ## x = (int('9'*args.maxDigits)-1)/2
+        x = (base.decode(baseStr[-1]*args.maxDigits)-1)/2
         if x < maxN :
             maxN = x
 
-    commaFormat = "{:>,d}"
+    numFormat = "{:>{width}}"
     if args.maxDigits > 0 :
-        commaFormatMaxLen = len(commaFormat.format(int("9"*int(math.ceil(args.maxDigits)))))
+        numFormatMaxLen = args.maxDigits
     else :
-        commaFormatMaxLen = len(commaFormat.format(maxN * maxN))
+        numFormatMaxLen = len(base.encode(maxN * maxN))
 
-    formatList = [0]
-    commaFormattMaxN = commaFormat.format(maxN)
-    formatList.append(len(commaFormattMaxN))
-    commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
-    outputLine = commaFormatPad.format(1).replace("1", "*") + " | "
+    formatList = [0] # I think this was so the index and numbers matched?
+    formatList.append(len(base.encode(maxN)))
+    numFormatPad = "{:>" + str(len(base.encode(formatList[-1]))) + "}"
+    outputLine = numFormatPad.format(1).replace("1", "*") + " | "
+    ## print(outputLine)
+    ## sys.exit(0)
 
     n = 2
     while n <= maxN :
-        formatList.append(commaFormatMaxLen)
+        formatList.append(numFormatMaxLen)
 
-        commaFormatPad = "{:>"+ str(formatList[-1]) + ",d}"
+        numFormatPad = "{:>" + str(len(base.encode(formatList[-1]))) + "}"
+        # Note the following is always true if we aren't filtering for ONLY primes. (hacky)
         if isPrime[n] :
-            outputLine += commaFormatPad.format(n) + "  "
+            outputLine += numFormatPad.format(base.encode(n)) + "  "
         n += 1
+
+    ## print(outputLine)
+    ## sys.exit(0)
 
     # Make the horizontal dividing line of the table
     #
     dividingLine = "-"*len(outputLine)
     s = list(dividingLine)
-    s[formatList[1] + 1] = '+'
+    s[formatList[1]] = '+'
 
     # Print 2...n on the first row then the dividing line.
     #
-    print outputLine
-    print "".join(s)
+    print(outputLine)
+    print("".join(s))
+
+    # sys.exit(0)
 
     # Print the multiplication table.
     #
     n = 2
     while n <= maxN :
-        commaFormatPad = "{:>"+ str(formatList[1]) + ",d}"
-        outputLine = commaFormatPad.format(n) + " | "
+        numFormatPad = "{:>"+ str(formatList[1]) + "}"
+        outputLine = numFormatPad.format(base.encode(n)) + " | "
         m = 2
         if isPrime[n] :
             while m <= maxN :
                 if isPrime[m] :
                     x = n * m
-                    commaFormatPad = "{:>"+ str(formatList[m]) + ",d}"
+                    numFormatPad = "{:>"+ str(formatList[m]) + "}"
                     if args.maxDigits > 0 :
                         if math.log(x, 10) <= args.maxDigits - kEpsilon :
-                            outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
+                            outputLine += numFormatPad.format(base.encode(x)) + ("* " if n == m else "  ")
                         else :
                             break
                     else :
-                        outputLine += commaFormatPad.format(x) + ("* " if n == m else "  ")
+                        outputLine += numFormatPad.format(base.encode(x)) + ("* " if n == m else "  ")
                 m += 1
-            print outputLine
+            print(outputLine)
         n += 1
 
 if __name__ == '__main__':
