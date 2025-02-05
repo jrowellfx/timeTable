@@ -45,6 +45,12 @@ import math
 import baseconv
 import string
 
+# MAJOR version for incompatible API changes
+# MINOR version for added functionality in a backwards compatible manner
+# PATCH version for backwards compatible bug fixes
+#
+VERSION = "2.0.0"     # Semantic Versioning 2.0.0
+
 def main():
 
     kEpsilon = 1.0e-12
@@ -68,7 +74,7 @@ def main():
             '''),
         usage="%(prog)s [OPTION]...")
 
-    p.add_argument("--version", action="version", version="2.000")
+    p.add_argument("--version", action="version", version=VERSION)
     p.add_argument("--base", "-b", action="store", type=int, dest="base",
         default=10, metavar="N",
         help="The base of the number system. Base must be in range [2, 62]. (default=10).")

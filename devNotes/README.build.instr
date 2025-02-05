@@ -1,0 +1,93 @@
+# Helpful NOTES TO SELF for developer James Rowell.
+#
+# Regarding installing and/or testing latest versions of times-table.
+#
+
+cd $HOME
+python3 --version
+
+# First STEPS.
+#
+# If the system has upgraded the default 'python3' (from say 3.6 to 3.9)
+# since the last time venv was created, then delete ~/venv, continue with
+#
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install --upgrade pip 
+    python3 -m pip install --upgrade setuptools wheel
+    python3 -m pip install --upgrade build
+    python3 -m pip install --upgrade twine
+# else
+    source venv/bin/activate
+
+cd <dirWithGitRepos>/times-table
+
+# make sure the VERSION is set properly in times-table/__main__.py, namely
+
+    Given a version number MAJOR.MINOR.PATCH, increment the:
+
+    MAJOR version for incompatible API changes
+    MINOR version for added functionality in a backwards compatible manner
+    PATCH version for backwards compatible bug fixes
+
+# change the version to match in setup.py
+cd tests
+source setUpToTest.sourceMe
+#
+# Then proceed with code-dev, testing the command at will.
+#
+# run the tests - make sure everthing is OK
+    and that the version in test_times-table.out is updated
+    for BOTH Darwin (MacOS) and Linux.
+
+# Update the version number in README.md if applicable
+
+# If on Linux, then PUSH up to github, and pull down to macos and test before building
+# and uploading to pypi
+
+# IF on working branch FIRST merge it back to master
+# UNLESS still testing with testpypi below, then wait
+# until satisfied with all tests.
+
+python3 -m build
+
+# Change next line to whatever latest version is. Then use
+# __token__ and password for PyPi account.
+# ...or not needed if .pypirc is installed in $HOME
+#
+# TEST INSTALLATION testpypi
+#
+#   python3 -m twine upload --repository testpypi dist/times-table-x.x.x*
+#
+# or FOR REAL on pypi
+#
+python3 -m twine upload --repository pypi dist/times-table-x.x.x*
+
+# NOTE! Sometimes you have to wait 5 minutes or so for
+# the update to take effect on the pipy server before the install
+# below will pick up the latest version.
+
+# Install it locally in venv,
+    #
+    # TEST (First one is for test.pypi - second is for non-test dependencies)
+    #
+    # python3 -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ times-table
+    #
+    # or the REAL one on pypi
+    #
+    python3 -m pip install times-table
+
+# or update it, append '--upgrade' to either of the above lines.
+
+# Test installation.
+#
+cd tests
+./test_times-table --testSystem-times-table
+diff test_times-table.out.Linux test_times-table.out.Linux.installed.new
+
+# !! Double that any branch is MERGED back to master/main branch
+
+CHECK IN AN COMMIT ALL CHANGES AND PUSH UP TO GITHUB
+
+
+MAKE NEW github RELEASE to match VERSION
