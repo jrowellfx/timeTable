@@ -7,7 +7,7 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
-    name            = 'times-table',
+    name            = 'timesTable',
     version         = '2.0.0',
     description='prints an N x N multiplication table',
     long_description=long_description,
@@ -25,13 +25,13 @@ setup(
         'Development Status :: 5 - Production/Stable',
     ],
 
-    packages        = ['times-table'],
+    packages        = ['timesTable'],
     python_requires = '>=3.6, <4',
     install_requires=['python-baseconv>=1.2.2'],
 
     entry_points = {
         'console_scripts': [
-            'times-table = times-table.__main__:main',
+            'times-table = timesTable.__main__:main',
         ]
     }
 )
