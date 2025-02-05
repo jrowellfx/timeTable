@@ -1,6 +1,7 @@
 # Helpful NOTES TO SELF for developer James Rowell.
 #
-# Regarding installing and/or testing latest versions of times-table.
+# Regarding installing and/or testing latest versions of 
+# the times-table utility from the timesTable repo.
 #
 
 cd $HOME
@@ -11,18 +12,18 @@ python3 --version
 # If the system has upgraded the default 'python3' (from say 3.6 to 3.9)
 # since the last time venv was created, then delete ~/venv, continue with
 #
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv venv_timesTable
+    source venv_timesTable/bin/activate
     python3 -m pip install --upgrade pip 
     python3 -m pip install --upgrade setuptools wheel
     python3 -m pip install --upgrade build
     python3 -m pip install --upgrade twine
 # else
-    source venv/bin/activate
+    source venv_timesTable/bin/activate
 
-cd <dirWithGitRepos>/times-table
+cd <dirWithGitRepos>/timesTable
 
-# make sure the VERSION is set properly in times-table/__main__.py, namely
+# make sure the VERSION is set properly in timesTable/__main__.py, namely
 
     Given a version number MAJOR.MINOR.PATCH, increment the:
 
@@ -57,11 +58,11 @@ python3 -m build
 #
 # TEST INSTALLATION testpypi
 #
-#   python3 -m twine upload --repository testpypi dist/times-table-x.x.x*
+#   python3 -m twine upload --repository testpypi dist/times[tT]able-x.x.x*
 #
 # or FOR REAL on pypi
 #
-python3 -m twine upload --repository pypi dist/times-table-x.x.x*
+python3 -m twine upload --repository pypi dist/times[tT]able-x.x.x*
 
 # NOTE! Sometimes you have to wait 5 minutes or so for
 # the update to take effect on the pipy server before the install
@@ -71,11 +72,11 @@ python3 -m twine upload --repository pypi dist/times-table-x.x.x*
     #
     # TEST (First one is for test.pypi - second is for non-test dependencies)
     #
-    # python3 -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ times-table
+    # python3 -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ timesTable
     #
     # or the REAL one on pypi
     #
-    python3 -m pip install times-table
+    python3 -m pip install timesTable
 
 # or update it, append '--upgrade' to either of the above lines.
 
