@@ -1,4 +1,4 @@
-# times-table
+# About times-table
 
 A utility to print a nicely formatted n-by-n times-table for any base from two to sixty-two.
 
