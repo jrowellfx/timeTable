@@ -12,13 +12,9 @@ optional arguments:
 ## Installing `times-table`
 
 ```
-    python3 -m pip install timesTable
-```
-If you already have `times-table` installed, upgrade to newer versions like this:
-
-```
     python3 -m pip install timesTable --upgrade
 ```
+
 It's recommended to install into a local `venv`, or if installing systemwide
 as the super-user to make a `venv` in `/usr/local/venv`, and install it there.
 For some helpful hints about how to do this see the 
